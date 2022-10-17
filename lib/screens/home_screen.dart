@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final dateStartExit =
           DateTime(date.year, date.month, date.day, 15, 50); // 15 50
-      final dateEndExit = dateStartExit.add(Duration(hours: 2));
+      final dateEndExit = dateStartExit.add(Duration(hours: 1));
 
       if (date.millisecondsSinceEpoch > dateStartExit.millisecondsSinceEpoch &&
           date.millisecondsSinceEpoch < dateEndExit.millisecondsSinceEpoch) {
