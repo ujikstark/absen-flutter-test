@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.absensi_honor_android">
    <application
-        android:label="absensi_honor_android"
+        android:label="Honorer Kejaksaan"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
