@@ -40,11 +40,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (responseAttendance.isNotEmpty) {
         var firstAttendance = responseAttendance.first;
         var firstEnteredAt = DateTime.parse(firstAttendance['enteredAt']);
-        if (firstEnteredAt.day == i) {
+        var firstExitedAt = DateTime.parse(firstAttendance['exitedAt'] ?? DateFormat('yyyy-MM-dd').format(DateTime(2017, 10,10)));
+
+        if (firstEnteredAt.day == i && firstExitedAt.day == i) {
           attendances.add(firstAttendance);
           responseAttendance.remove(firstAttendance);
         } else {
-          attendances.add({});
+          attendances.add({});  
         }
       } else {
         if (DateTime(dateNow.year, monthNumber + 1, i).isBefore(

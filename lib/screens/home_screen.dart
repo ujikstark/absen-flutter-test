@@ -45,11 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
       if (prefs.containsKey('user')) {
         final user = prefs.getStringList('user');
 
-        setState(() {
-          userId = user?[0];
-          nameOfUser = user?[1];
-          lastAttendance = user?[2];
-        });
+        if (user?.length == 3) {
+          setState(() {
+            userId = user?[0];
+            nameOfUser = user?[1];
+            lastAttendance = user?[2];
+          });
+        } else {
+          setState(() {
+            userId = user?[0];
+            nameOfUser = user?[1];
+          });
+        }
       }
     }
   }
@@ -117,16 +124,18 @@ class _HomeScreenState extends State<HomeScreen> {
             final lastEnteredDate =
                 DateTime.parse(attendance.data['enteredAt']);
 
+            final lastExitedDate = DateTime.parse(
+                attendance.data['exitedAt'] ?? DateFormat('yyyy-MM-dd').format(DateTime(2017,10,10)));
+
             if (lastEnteredDate.year == date.year &&
                 lastEnteredDate.month == date.month &&
                 lastEnteredDate.day == date.day) {
               await prefs.setInt('enter_id', attendance.data['id']);
             }
-
             await prefs.setInt(
                 'entered_date', lastEnteredDate.millisecondsSinceEpoch);
             await prefs.setInt(
-                'exited_date', lastEnteredDate.millisecondsSinceEpoch);
+                'exited_date', lastExitedDate.millisecondsSinceEpoch);
             nameOfUser = user.data['name'];
 
             // exitDateAttendance = attendance.data['exitedAt'];
@@ -265,49 +274,47 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 // if distance on meters
                                 if (distance <= 200) {
-                                  try {
-                                    final prefs =
-                                        await SharedPreferences.getInstance();
+                                try {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
 
-                                    final response = await AttendanceService()
-                                        .enterAttendance();
-                                    if (response.statusCode == 201) {
-                                      await prefs.setInt(
-                                          'entered_date',
-                                          DateTime.now()
-                                              .millisecondsSinceEpoch);
-                                      await prefs.setInt('exited_date', 0);
-                                      await prefs.setInt(
-                                          'enter_id', response.data['id']);
-                                      AwesomeDialog(
-                                        context: context,
-                                        dialogType: DialogType.success,
-                                        title: 'Absen Masuk Berhasil',
-                                        autoHide: Duration(seconds: 5),
-                                      ).show().whenComplete(() {
-                                        setState(() {
-                                          isWaitEnter = false;
-                                          isEnterDone = true;
-                                        });
-                                      });
-                                    } else {
-                                      Navigator.of(context)
-                                          .pushNamedAndRemoveUntil('/login',
-                                              (Route<dynamic> route) => false);
-                                    }
-                                  } catch (err) {
+                                  final response = await AttendanceService()
+                                      .enterAttendance();
+                                  if (response.statusCode == 201) {
+                                    await prefs.setInt('entered_date',
+                                        DateTime.now().millisecondsSinceEpoch);
+                                    await prefs.setInt('exited_date', 0);
+                                    await prefs.setInt(
+                                        'enter_id', response.data['id']);
                                     AwesomeDialog(
                                       context: context,
-                                      dialogType: DialogType.error,
-                                      title: 'Error',
-                                      desc: 'Something was wrong!',
+                                      dialogType: DialogType.success,
+                                      title: 'Absen Masuk Berhasil',
                                       autoHide: Duration(seconds: 5),
                                     ).show().whenComplete(() {
                                       setState(() {
                                         isWaitEnter = false;
+                                        isEnterDone = true;
                                       });
                                     });
+                                  } else {
+                                    Navigator.of(context)
+                                        .pushNamedAndRemoveUntil('/login',
+                                            (Route<dynamic> route) => false);
                                   }
+                                } catch (err) {
+                                  AwesomeDialog(
+                                    context: context,
+                                    dialogType: DialogType.error,
+                                    title: 'Error',
+                                    desc: 'Something was wrong!',
+                                    autoHide: Duration(seconds: 5),
+                                  ).show().whenComplete(() {
+                                    setState(() {
+                                      isWaitEnter = false;
+                                    });
+                                  });
+                                }
                                 } else {
                                   AwesomeDialog(
                                     context: context,
@@ -372,11 +379,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                       destinationLatitude,
                                       destinationLongitude);
                                   // if distance on meters
-                                  if (distance >= 200) {
+                                  if (distance <= 200) {
                                     final prefs =
                                         await SharedPreferences.getInstance();
                                     final enterId = prefs.getInt('enter_id');
-                                    
+
                                     final response = await AttendanceService()
                                         .exitDone(enterId.toString());
                                     if (response.statusCode == 200) {
