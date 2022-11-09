@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:absensi_honor_android/network/api/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static UserService? _instance;
@@ -44,6 +45,17 @@ class UserService {
     }
 
     return response;
+
+  }
+
+  Future<void> logout() async {
+
+    final storage = new FlutterSecureStorage();
+    final pref = await SharedPreferences.getInstance();
+   
+      storage.deleteAll();
+      pref.clear();
+
 
   }
 

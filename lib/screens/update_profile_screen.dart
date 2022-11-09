@@ -24,29 +24,46 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     final user = prefs.getStringList('user');
     userId = user?[0] ?? '';
+    print(userId);
     if (prefs.containsKey('userFullInfo')) {
+      print('yes');
       final userFullInfo = prefs.getStringList('userFullInfo');
-      _nameController.text = userFullInfo?[0] ?? '';
-      _addressController.text = userFullInfo?[1] ?? '';
-      _phoneNumberController.text = userFullInfo?[2] ?? '';
+      print(userFullInfo?.length);
+      if (userFullInfo?.length == 1) {
+        _nameController.text = userFullInfo?[0] ?? '';
+      } else if (userFullInfo?.length == 2) {
+        _nameController.text = userFullInfo?[0] ?? '';
+        _addressController.text = userFullInfo?[1] ?? '';
+      } else if (userFullInfo?.length == 3) {
+        _nameController.text = userFullInfo?[0] ?? '';
+        _addressController.text = userFullInfo?[1] ?? '';
+        _phoneNumberController.text = userFullInfo?[2] ?? '';
+      } else if (userFullInfo?.length == 4)   {
+                _nameController.text = userFullInfo?[0] ?? '';
+        _addressController.text = userFullInfo?[1] ?? '';
+        _phoneNumberController.text = userFullInfo?[2] ?? '';
       _descriptionController.text = userFullInfo?[3] ?? '';
-    } else {
-      try {
-        final user = await UserService().getUser(userId);
-        prefs.setStringList('userFullInfo', [
-          user.data['name'] ?? '',
-          user.data['address'] ?? '',
-          user.data['phoneNumber'] ?? '',
-          user.data['description'] ?? '',
-        ]);
-        _nameController.text = user.data['name'] ?? '';
-        _addressController.text = user.data['address'] ?? '';
-        _phoneNumberController.text = user.data['phoneNumber'] ?? '';
-        _descriptionController.text = user.data['description'] ?? '';
-      } catch (err) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
       }
+
+
+    } else {
+        try {
+          final user = await UserService().getMe();
+          prefs.setStringList('userFullInfo', [
+            user.data['name'] ?? '',
+            user.data['address'] ?? '',
+            user.data['phoneNumber'] ?? '',
+            user.data['description'] ?? '',
+          ]);
+          _nameController.text = user.data['name'] ?? '';
+          _addressController.text = user.data['address'] ?? '';
+          _phoneNumberController.text = user.data['phoneNumber'] ?? '';
+          _descriptionController.text = user.data['description'] ?? '';
+        } catch (err) {
+          await UserService().logout();
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+        }
     }
   }
 
@@ -59,7 +76,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     _addressController = TextEditingController();
     _phoneNumberController = TextEditingController();
     _descriptionController = TextEditingController();
-
+    print('na');
     currentData();
   }
 
